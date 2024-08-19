@@ -94,7 +94,7 @@ export default function HomeScreen() {
   const [buttonType, setButtonType] = useState(0)
 
   async function updateData() {
-    await axios.get("http://time.xianyi.it/getTime").then(async (res) => {
+    await axios.get("https://time.xianyi.it/getTime").then(async (res) => {
       let data = res.data.data
       console.log(data);
       

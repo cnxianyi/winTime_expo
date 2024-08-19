@@ -50,7 +50,7 @@ echarts.use([
 ]);
 
 const { width, height } = Dimensions.get('window');
-const E_HEIGHT = height * 0.95; // 100vh
+const E_HEIGHT = height * 0.90; // 100vh
 const E_WIDTH = width;   // 100vw
 
 function ChartComponent({ option }: { option: any }) {
@@ -164,7 +164,7 @@ export default function App() {
 
     const [option, setOption] = useState({
         title: {
-            text: `已使用 10 分钟\n超时限制 10分钟`,
+            text: ``,
             left: "center",
         },
         grid: {
@@ -172,7 +172,7 @@ export default function App() {
           },
         yAxis: {
             type: 'category',
-            data: ["QQ", "Chrome", "其他"],
+            data: [],
             axisLabel: {
                 fontSize: 14 // 直接在 axisLabel 中设置字体大小
             }
@@ -185,7 +185,7 @@ export default function App() {
         },
         series: [
             {
-                data: [120, 200, 150],
+                data: [],
                 type: 'bar'
             }
         ]
@@ -193,7 +193,7 @@ export default function App() {
     
     // 如果需要动态更新 option，你可以在此处调用 setOption
     useEffect(() => {
-        axios.get("http://time.xianyi.it/getTime").then((res) => {
+        axios.get("https://time.xianyi.it/getTime").then((res) => {
             let data = res.data.data
             console.log(data);
             storeData("all" , ((data.all) / 60).toFixed())
