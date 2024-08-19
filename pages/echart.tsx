@@ -9,8 +9,36 @@ import {
     TooltipComponent,
     GridComponent,
 } from 'echarts/components';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Dimensions, StyleSheet, View } from 'react-native';
 import axios from 'axios';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+
+// 存储数据
+// 存储数据
+const storeData = async (key: string, value: string) => {
+    try {
+      await AsyncStorage.setItem(key, value);
+    } catch (e) {
+      // 保存错误
+      console.log('保存失败');
+    }
+  };
+  
+  // 读取数据
+  const getData = async (key:string) => {
+    try {
+      const value = await AsyncStorage.getItem(key);
+      if(value !== null) {
+        return value
+      }else{
+        return 'empty'
+      }
+    } catch(e) {
+      return 'empty'
+    }
+  };
 
 // 注册扩展组件
 echarts.use([
@@ -131,6 +159,9 @@ function setProgramKey(key: string){
 }
 
 export default function App() {
+
+    const [isLoading , setIsLoading] = useState(true)
+
     const [option, setOption] = useState({
         title: {
             text: `已使用 10 分钟\n超时限制 10分钟`,
@@ -159,11 +190,15 @@ export default function App() {
             }
         ]
     });
-
+    
     // 如果需要动态更新 option，你可以在此处调用 setOption
     useEffect(() => {
         axios.get("http://time.xianyi.it/getTime").then((res) => {
             let data = res.data.data
+            console.log(data);
+            storeData("all" , ((data.all) / 60).toFixed())
+            storeData("limit" , (data.Limit / 60).toFixed())
+            
             let XA = slice_reverse_arr(res.data.data)
             //console.log(res.data.data);
 
@@ -171,12 +206,12 @@ export default function App() {
 
             let newOption = {
                 title: {
-                    text: `已使用 ${((data.all - data.Limit) / 60).toFixed()}分钟\n超时限制${data.Limit / 60}分钟`,
+                    text: `已使用 ${((data.all) / 60).toFixed()}分钟\n超时限制${(data.Limit / 60).toFixed()}分钟`,
                     left: "center",
                 },
                 grid: {
                     left: "20%", // 设置左侧文字的宽度
-                  },
+                },
                 yAxis: {
                     data: XA.map((item) => setProgramKey(String(item[0]))),
                     axisLabel: {
@@ -200,19 +235,39 @@ export default function App() {
                     }
                 },
                 dataGroupId: "",
-                animationDurationUpdate: 500,
-                series: {
-                    type: "bar",
-                    id: "sales",
-                    data: XA.map((item) => {
-                        return { value: item[1], groupId: item[0] };
-                    }),
-
-                    universalTransition: {
-                        enabled: true,
-                        divideShape: "clone",
-                    },
+                animationDuration: 1500, // 图表初始动画时长（ms）
+                animationEasing: 'quarticInOut', // 动画缓动效果
+                //@ts-ignore
+                animationDelayUpdate: function (idx) { // 数据更新时的动画延迟
+                    return idx * 10; // 每条数据的延迟
                 },
+                series: [
+                    {
+                        type: "bar",
+                        id: "sales",
+                        data: XA.map((item) => {
+                            return { value: item[1], groupId: item[0] };
+                        }),
+                        universalTransition: {
+                            enabled: true,
+                            divideShape: "clone",
+                        },
+                        itemStyle: {
+                            color: '#3398DB' // 柱状图的颜色
+                        },
+                        emphasis: {
+                            focus: 'series',
+                            itemStyle: {
+                                color: '#FF6347' // 鼠标悬停时柱状图的颜色
+                            },
+                            label: {
+                                show: true,
+                                position: 'top',
+                                formatter: '{c}秒'
+                            }
+                        }
+                    }
+                ],
                 label: {
                     show: true,
                     position: "right", // 在柱状图的右侧显示
@@ -222,19 +277,36 @@ export default function App() {
 
             //@ts-ignore
             setOption(newOption)
-
+            setTimeout(() => {
+                setIsLoading(false)
+            }, 100);
         })
     }, [])
 
     return (
         <View style={styles.container}>
-            <ChartComponent option={option} />
+
+            {
+                isLoading ? (<View style={[styles.horizontal]}>
+                    <ActivityIndicator size="small" color="#0000ff" />
+                    </View>) 
+                    :
+                    <ChartComponent option={option} />
+            }
+
+            
         </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-
-    },
+        flex: 1,
+        justifyContent: "center"
+      },
+    horizontal: {
+        flexDirection: "row",
+        justifyContent: "space-around",
+        padding: 10
+      }
 });

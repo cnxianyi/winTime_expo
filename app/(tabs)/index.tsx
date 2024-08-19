@@ -26,6 +26,8 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 
 import EchartPage from "@/pages/echart"
+import { useEffect, useRef, useState } from 'react';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function HomeScreen() {
 
@@ -34,11 +36,37 @@ export default function HomeScreen() {
   const backgroundStyle = {
     backgroundColor: isDarkMode ? "#121212" : "#ffffff",
     flex: 1
-  };
+  }
+
+  // 重新加载
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    if (isFocused) {
+
+      // 修改key 重新加载
+      setRefreshKey(prevKey => prevKey + 1);
+    }
+  }, [isFocused]);
 
   NavigationBar.setBackgroundColorAsync(backgroundStyle.backgroundColor);
   NavigationBar.setBorderColorAsync(backgroundStyle.backgroundColor);
-  
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+      paddingTop: 30
+    },
+    text: {
+      fontSize: 24,
+      color: isDarkMode ? "#ffffff" : "#121212",
+    },
+  });
+
   return (
     <SafeAreaView style={backgroundStyle}>
       <StatusBar
@@ -46,22 +74,10 @@ export default function HomeScreen() {
         backgroundColor={backgroundStyle.backgroundColor}
       />
       <View style={styles.container}>
-      <EchartPage></EchartPage>
+        <EchartPage key={refreshKey}></EchartPage>
       </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
-    paddingTop: 20
-  },
-  text: {
-    fontSize: 24,
-    color: 'black',
-  },
-});
+
