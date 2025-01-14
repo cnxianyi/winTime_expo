@@ -193,7 +193,7 @@ export default function App() {
     
     // 如果需要动态更新 option，你可以在此处调用 setOption
     useEffect(() => {
-        axios.get("https://time.xianyi.it/getTime").then((res) => {
+        axios.get("https://time.xianyiapi.eu.org/getTime").then((res) => {
             let data = res.data.data
             console.log(data);
             storeData("all" , ((data.all) / 60).toFixed())

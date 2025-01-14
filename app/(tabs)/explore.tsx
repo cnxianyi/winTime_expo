@@ -94,7 +94,7 @@ export default function HomeScreen() {
   const [buttonType, setButtonType] = useState(0)
 
   async function updateData() {
-    await axios.get("https://time.xianyi.it/getTime").then(async (res) => {
+    await axios.get("https://time.xianyiapi.eu.org/getTime").then(async (res) => {
       let data = res.data.data
       console.log(data);
       
@@ -150,13 +150,13 @@ export default function HomeScreen() {
       console.log('Password:', password);
 
       if (buttonType === 1) {
-        axios.get(`https://time.xianyi.it/getTime/setLimit?type=always&limit=${number}`).then((res) => {
+        axios.get(`https://time.xianyiapi.eu.org/getTime/setLimit?type=always&limit=${number}`).then((res) => {
           showToast('设置成功', res.data.msg)
           updateData()
           toggleModal();
         })
       } else if (buttonType === 2) {
-        axios.get(`https://time.xianyi.it/getTime/setLimit?type=today&limit=${number}`).then((res) => {
+        axios.get(`https://time.xianyiapi.eu.org/getTime/setLimit?type=today&limit=${number}`).then((res) => {
           showToast('设置成功', res.data.msg)
           updateData()
           toggleModal();
